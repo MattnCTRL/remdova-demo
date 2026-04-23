@@ -11,7 +11,7 @@ import {
 const IMG = {
   hero:       'https://plus.unsplash.com/premium_photo-1751728435152-2017b8349c96?auto=format&fit=crop&w=1800&q=85',
   waterDmg:   'https://plus.unsplash.com/premium_photo-1751678866419-6a02eebba957?auto=format&fit=crop&w=700&q=80',
-  moldRoom:   'https://images.unsplash.com/photo-1597296721548-ad75c6a150b3?auto=format&fit=crop&w=700&q=80',
+  moldRoom:   'https://images.pexels.com/photos/18302377/pexels-photo-18302377.jpeg?auto=compress&cs=tinysrgb&w=700&h=400&fit=crop',
   fireDmg:    'https://images.unsplash.com/photo-1593091285708-8dc58f9ff4b5?auto=format&fit=crop&w=700&q=80',
   biohazard:  'https://plus.unsplash.com/premium_photo-1663090722153-120cf71c908d?auto=format&fit=crop&w=700&q=80',
   structural: 'https://plus.unsplash.com/premium_photo-1661958174732-9374d24f827c?auto=format&fit=crop&w=700&q=80',
