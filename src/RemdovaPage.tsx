@@ -297,6 +297,15 @@ export default function RemdovaPage() {
           .why-grid { grid-template-columns: 1fr 1fr !important; }
           .areas-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
+          .content-section { padding-top: 64px !important; padding-bottom: 64px !important; }
+          .about-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .reviews-grid { grid-template-columns: 1fr !important; }
+          .footer-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+          .footer-nav { justify-content: flex-start !important; }
+          .footer-contact-col { text-align: left !important; }
+          .footer-contact-col a { justify-content: flex-start !important; }
+          .about-badge { position: static !important; display: inline-block; margin-top: 16px; }
+          .hero-pill { flex-wrap: wrap !important; }
         }
         @media (max-width: 480px) {
           .why-grid { grid-template-columns: 1fr !important; }
@@ -414,7 +423,7 @@ export default function RemdovaPage() {
 
           {/* 24/7 CTA */}
           <motion.div variants={fadeIn} initial="hidden" animate="visible" custom={0} style={{ marginBottom: 28 }}>
-            <a href={PHONE_HREF} style={{
+            <a href={PHONE_HREF} className="hero-pill" style={{
               display: 'inline-flex', alignItems: 'center', gap: 14,
               background: 'rgba(249,115,22,0.12)',
               border: '1px solid rgba(249,115,22,0.35)',
@@ -546,7 +555,7 @@ export default function RemdovaPage() {
       </section>
 
       {/* ── Services ── */}
-      <section id="services" style={{ padding: '100px 5%', background: '#f9f7f4' }}>
+      <section id="services" className="content-section" style={{ padding: '100px 5%', background: '#f9f7f4' }}>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
           style={{ textAlign: 'center', marginBottom: 64 }}
         >
@@ -591,8 +600,8 @@ export default function RemdovaPage() {
       </section>
 
       {/* ── About ── */}
-      <section id="about" style={{ padding: '100px 5%', background: '#0a0e1a' }}>
-        <div style={{ maxWidth: 1160, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
+      <section id="about" className="content-section" style={{ padding: '100px 5%', background: '#0a0e1a' }}>
+        <div className="about-grid" style={{ maxWidth: 1160, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
             <div style={{ color: '#f97316', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
               About Remdova
@@ -624,7 +633,7 @@ export default function RemdovaPage() {
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,14,26,0.25)', borderRadius: 20 }} />
             </div>
             {/* Floating badge */}
-            <div style={{
+            <div className="about-badge" style={{
               position: 'absolute', bottom: -20, left: -20,
               background: 'linear-gradient(135deg, #f97316, #ea580c)',
               borderRadius: 16, padding: '20px 26px',
@@ -638,7 +647,7 @@ export default function RemdovaPage() {
       </section>
 
       {/* ── Why Us ── */}
-      <section style={{ padding: '100px 5%', background: '#fff' }}>
+      <section className="content-section" style={{ padding: '100px 5%', background: '#fff' }}>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
           style={{ textAlign: 'center', marginBottom: 64 }}
         >
@@ -671,7 +680,7 @@ export default function RemdovaPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" style={{ padding: '100px 5%', background: '#0a0e1a' }}>
+      <section id="pricing" className="content-section" style={{ padding: '100px 5%', background: '#0a0e1a' }}>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
           style={{ textAlign: 'center', marginBottom: 16 }}
         >
@@ -745,7 +754,7 @@ export default function RemdovaPage() {
       </section>
 
       {/* ── Service Areas ── */}
-      <section id="areas" style={{ padding: '100px 5%', background: '#f9f7f4', position: 'relative', overflow: 'hidden' }}>
+      <section id="areas" className="content-section" style={{ padding: '100px 5%', background: '#f9f7f4', position: 'relative', overflow: 'hidden' }}>
         {/* BG Oregon landscape */}
         <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${IMG.oregon})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.18 }} />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1160, margin: '0 auto' }}>
@@ -806,7 +815,7 @@ export default function RemdovaPage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section style={{ padding: '100px 5%', background: '#0a0e1a' }}>
+      <section className="content-section" style={{ padding: '100px 5%', background: '#0a0e1a' }}>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
           style={{ textAlign: 'center', marginBottom: 56 }}
         >
@@ -818,7 +827,7 @@ export default function RemdovaPage() {
           </h2>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 1160, margin: '0 auto' }}>
+        <div className="reviews-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 1160, margin: '0 auto' }}>
           {[
             {
               name: 'Karen T.', location: 'Lake Oswego',
@@ -859,7 +868,7 @@ export default function RemdovaPage() {
       </section>
 
       {/* ── Contact ── */}
-      <section id="contact" style={{ padding: '100px 5%', background: '#f9f7f4' }}>
+      <section id="contact" className="content-section" style={{ padding: '100px 5%', background: '#f9f7f4' }}>
         <div style={{ maxWidth: 1160, margin: '0 auto' }}>
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
             style={{ textAlign: 'center', marginBottom: 64 }}
@@ -962,7 +971,7 @@ export default function RemdovaPage() {
       {/* ── Footer ── */}
       <footer style={{ background: '#060810', padding: '56px 5% 32px', color: 'rgba(255,255,255,0.45)' }}>
         <div style={{ maxWidth: 1160, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'start', gap: 40, marginBottom: 40, flexWrap: 'wrap' }}>
+          <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'start', gap: 40, marginBottom: 40, flexWrap: 'wrap' }}>
             {/* Brand */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
@@ -1002,7 +1011,7 @@ export default function RemdovaPage() {
             </div>
 
             {/* Nav links */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap', fontSize: '0.85rem', paddingTop: 4 }}>
+            <div className="footer-nav" style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap', fontSize: '0.85rem', paddingTop: 4 }}>
               {['Services', 'Pricing', 'About', 'Areas', 'Contact'].map(link => (
                 <a key={link} href={`#${link.toLowerCase()}`} style={{ color: 'rgba(255,255,255,0.45)' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#f97316')}
@@ -1012,7 +1021,7 @@ export default function RemdovaPage() {
             </div>
 
             {/* Contact */}
-            <div style={{ textAlign: 'right' }}>
+            <div className="footer-contact-col" style={{ textAlign: 'right' }}>
               <a href={PHONE_HREF} style={{ color: '#fff', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'flex-end', marginBottom: 8 }}>
                 <Phone size={14} color="#f97316" />{PHONE}
               </a>
