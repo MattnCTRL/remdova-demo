@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import {
   Phone, Mail, MapPin, Menu, X, Clock, Shield, Star,
@@ -207,6 +207,25 @@ const PRICING = [
   },
 ]
 
+// ── Logo mark ────────────────────────────────────────────────────────────────
+function DropletIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={Math.round(size * 1.22)} viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 1C9 1 1 8.5 1 13.5C1 18.09 4.58 22 9 22C13.42 22 17 18.09 17 13.5C17 8.5 9 1 9 1Z" fill="white" fillOpacity="0.95"/>
+      <path d="M5.5 15C5.5 15 5 17.5 7.5 18.5" stroke="rgba(249,115,22,0.45)" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+const WORDMARK_STYLE: React.CSSProperties = {
+  fontWeight: 800,
+  letterSpacing: '-0.03em',
+  background: 'linear-gradient(90deg, #ffffff 20%, #fdba74 100%)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 export default function RemdovaPage() {
   const [menuOpen, setMenuOpen]         = useState(false)
@@ -308,11 +327,9 @@ export default function RemdovaPage() {
             background: 'linear-gradient(135deg, #f97316, #ea580c)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Shield size={18} color="#fff" />
+            <DropletIcon size={17} />
           </div>
-          <span style={{ fontWeight: 800, fontSize: '1.2rem', color: '#fff', letterSpacing: '-0.02em' }}>
-            Remdova
-          </span>
+          <span style={{ ...WORDMARK_STYLE, fontSize: '1.2rem' }}>Remdova</span>
         </a>
 
         {/* Desktop links */}
@@ -950,9 +967,12 @@ export default function RemdovaPage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #f97316, #ea580c)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Shield size={15} color="#fff" />
+                  <DropletIcon size={14} />
                 </div>
-                <span style={{ fontWeight: 800, color: '#fff', fontSize: '1.05rem' }}>Remdova</span>
+                <div>
+                  <span style={{ ...WORDMARK_STYLE, fontSize: '1.05rem', display: 'block' }}>Remdova</span>
+                  <span style={{ fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', display: 'block', marginTop: 1 }}>Restoration</span>
+                </div>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.82rem', lineHeight: 1.65, maxWidth: 200, margin: '0 0 18px' }}>
                 Oregon's emergency restoration team. Available 24/7.
