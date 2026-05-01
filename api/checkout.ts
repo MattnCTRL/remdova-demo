@@ -17,9 +17,17 @@ const NOTIFY_TO = process.env.MICHAEL_EMAIL ?? 'info@remdova.com'
 
 type Intake = {
   name: string; phone: string; email: string
-  address: string; city: string; zip: string
+  address: string; city?: string; zip?: string
   damageType: string; damageDesc: string
-  insurance: string; policyHolder?: string
+  // Wizard-only fields — optional, captured in Stripe metadata for context.
+  waterFlowing?:     string
+  fireActive?:       string
+  startedWhen?:      string
+  scope?:            string
+  propertyType?:     string
+  insurance?:        string
+  insuranceCarrier?: string
+  policyHolder?:     string
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -61,16 +69,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Stripe metadata is the cleanest place to keep intake info — we can
       // pull it back via webhook later if/when we need to.
       metadata: {
-        name:        intake.name,
-        phone:       intake.phone,
-        email:       intake.email,
-        address:     intake.address,
-        city:        intake.city ?? '',
-        zip:         intake.zip ?? '',
-        damageType:  intake.damageType,
-        damageDesc:  intake.damageDesc.slice(0, 480),
-        insurance:   intake.insurance,
-        policyHolder: intake.policyHolder ?? '',
+        name:             intake.name,
+        phone:            intake.phone,
+        email:            intake.email,
+        address:          intake.address,
+        city:             intake.city ?? '',
+        zip:              intake.zip ?? '',
+        damageType:       intake.damageType,
+        damageDesc:       intake.damageDesc.slice(0, 480),
+        waterFlowing:     intake.waterFlowing ?? '',
+        fireActive:       intake.fireActive ?? '',
+        startedWhen:      intake.startedWhen ?? '',
+        scope:            intake.scope ?? '',
+        propertyType:     intake.propertyType ?? '',
+        insurance:        intake.insurance ?? '',
+        insuranceCarrier: intake.insuranceCarrier ?? '',
+        policyHolder:     intake.policyHolder ?? '',
       },
       success_url: `${origin}/?booked=1`,
       cancel_url:  `${origin}/?cancelled=1`,
@@ -93,6 +107,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 async function sendIntakeEmail(intake: Intake, sessionId: string, sessionUrl: string | null) {
   if (!resend) return
+
+  // Surface urgency cues prominently so Michael can triage at a glance.
+  const urgency: string[] = []
+  if (intake.waterFlowing === 'yes') urgency.push('Water still flowing')
+  if (intake.fireActive   === 'yes') urgency.push('Fire still active — caller advised to call 911')
+  if (intake.startedWhen  === 'just') urgency.push('Just happened (<1h)')
+
+  const detailRows = [
+    ['Phone',     `<a href="tel:${escape(intake.phone)}" style="color:#ea580c;">${escape(intake.phone)}</a>`],
+    ['Email',     `<a href="mailto:${escape(intake.email)}" style="color:#ea580c;">${escape(intake.email)}</a>`],
+    ['Address',   `${escape(intake.address)}${intake.city ? `, ${escape(intake.city)}` : ''}${intake.zip ? ` ${escape(intake.zip)}` : ''}`],
+    ['Damage',    escape(intake.damageType)],
+    ['Notes',     `<span style="white-space:pre-wrap;">${escape(intake.damageDesc)}</span>`],
+    intake.startedWhen   && ['When',         escape(intake.startedWhen)],
+    intake.scope         && ['Scope',        escape(intake.scope)],
+    intake.propertyType  && ['Property',     escape(intake.propertyType)],
+    intake.waterFlowing  && ['Water status', escape(intake.waterFlowing === 'yes' ? 'Still flowing' : 'Stopped')],
+    intake.fireActive    && ['Fire status',  escape(intake.fireActive === 'yes' ? 'Still burning' : 'Out')],
+    intake.insurance     && ['Insurance',    escape(intake.insurance) + (intake.insuranceCarrier ? ` — ${escape(intake.insuranceCarrier)}` : '') + (intake.policyHolder ? ` (policy: ${escape(intake.policyHolder)})` : '')],
+    ['Stripe Session', `<code style="font-size:11px;color:#6b7280;">${escape(sessionId)}</code>`],
+  ].filter(Boolean) as [string, string][]
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -106,16 +142,17 @@ async function sendIntakeEmail(intake: Intake, sessionId: string, sessionUrl: st
             <div style="font-size:22px;font-weight:900;letter-spacing:-0.02em;">${escape(intake.name)} — ${escape(intake.damageType)}</div>
           </td>
         </tr>
+        ${urgency.length ? `
+        <tr>
+          <td style="background:#fef2f2;padding:14px 28px;border-bottom:1px solid #fecaca;">
+            <div style="color:#991b1b;font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">⚠ Urgency signals</div>
+            <div style="color:#7f1d1d;font-size:14px;font-weight:600;">${urgency.map(escape).join(' · ')}</div>
+          </td>
+        </tr>` : ''}
         <tr>
           <td style="padding:24px 28px;">
             <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#1f2937;line-height:1.6;">
-              ${row('Phone',   `<a href="tel:${escape(intake.phone)}" style="color:#ea580c;">${escape(intake.phone)}</a>`)}
-              ${row('Email',   `<a href="mailto:${escape(intake.email)}" style="color:#ea580c;">${escape(intake.email)}</a>`)}
-              ${row('Address', `${escape(intake.address)}${intake.city ? `, ${escape(intake.city)}` : ''}${intake.zip ? ` ${escape(intake.zip)}` : ''}`)}
-              ${row('Damage',  escape(intake.damageType))}
-              ${row('Notes',   `<span style="white-space:pre-wrap;">${escape(intake.damageDesc)}</span>`)}
-              ${row('Insurance', escape(intake.insurance) + (intake.policyHolder ? ` (policy: ${escape(intake.policyHolder)})` : ''))}
-              ${row('Stripe Session', `<code style="font-size:11px;color:#6b7280;">${escape(sessionId)}</code>`)}
+              ${detailRows.map(([k, v]) => row(k, v)).join('')}
             </table>
             ${sessionUrl ? `<p style="font-size:12px;color:#9ca3af;margin:18px 0 0;">Customer is being redirected to Stripe Checkout. They have NOT paid yet — payment status will follow once they complete checkout.</p>` : ''}
           </td>
