@@ -4,8 +4,9 @@ import {
   Phone, Mail, MapPin, Menu, X, Clock, Shield, Star,
   Droplets, Wind, Flame, AlertTriangle, Wrench, CheckCircle,
   ArrowRight, ChevronDown, Award, Users, ThumbsUp,
-  Facebook, Instagram, Twitter, Youtube, Linkedin, Info,
+  Facebook, Instagram, Twitter, Youtube, Linkedin, Info, Zap,
 } from 'lucide-react'
+import BookingModal from './components/BookingModal'
 
 // ── Images (Unsplash CDN) ─────────────────────────────────────────────────────
 const IMG = {
@@ -24,6 +25,16 @@ const IMG = {
 const PHONE      = '(555) 555-5555'
 const PHONE_HREF = 'tel:+15555555555'
 const EMAIL      = 'info@remdova.com'
+
+// ── Nav structure ─────────────────────────────────────────────────────────────
+const NAV_LINKS: { label: string; href: string }[] = [
+  { label: 'Services',     href: '#services' },
+  { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Pricing',      href: '#pricing' },
+  { label: 'About',        href: '#about' },
+  { label: 'Areas',        href: '#areas' },
+  { label: 'Contact',      href: '#contact' },
+]
 
 // ── Rotating emergency types ──────────────────────────────────────────────────
 const EMERGENCY_TYPES = [
@@ -127,7 +138,7 @@ async function resolveCity(): Promise<string | null> {
 // ── Stats ─────────────────────────────────────────────────────────────────────
 const STATS = [
   { value: '10+', label: 'Years Experience' },
-  { value: '24/7', label: 'Emergency Response' },
+  { value: '60-Min', label: 'Portland Metro Response' },
   { value: '100%', label: 'Licensed & Insured' },
 ]
 
@@ -136,7 +147,7 @@ const WHY = [
   {
     icon: Clock,
     title: '60-Minute Response',
-    desc: 'When disaster strikes, every minute counts. Our crews are on-site within an hour, day or night.',
+    desc: 'When disaster strikes, every minute counts. Our crews are on-site in under an hour anywhere in the Portland metro.',
   },
   {
     icon: Award,
@@ -152,6 +163,30 @@ const WHY = [
     icon: ThumbsUp,
     title: 'Insurance-Approved Process',
     desc: 'We document everything from the start. Our process is designed to maximize your claim, not minimize our work.',
+  },
+]
+
+// ── How it works ──────────────────────────────────────────────────────────────
+const HOW_IT_WORKS = [
+  {
+    n: '01',
+    title: 'Book Emergency Service',
+    desc: 'Pay the $95 emergency response fee online. This locks in our 60-minute Portland-metro response and covers initial dispatch.',
+  },
+  {
+    n: '02',
+    title: 'Quick Online Intake',
+    desc: 'While our crew is en route, you fill out a 90-second intake form: name, address, contact, insurance details. We arrive ready to work.',
+  },
+  {
+    n: '03',
+    title: '60-Minute On-Site Response',
+    desc: 'A real local technician arrives within the hour. We assess the damage and start initial mitigation immediately — shop vac, fans, dehumidifiers — to stop the loss from spreading.',
+  },
+  {
+    n: '04',
+    title: 'Transparent Quote Before We Build',
+    desc: 'After mitigation, we walk you through next steps on iPad, give you a written estimate, and only proceed with restoration once you approve. No surprise invoices.',
   },
 ]
 
@@ -232,6 +267,21 @@ export default function RemdovaPage() {
   const [scrolled, setScrolled]         = useState(false)
   const [emergencyIdx, setEmergencyIdx] = useState(0)
   const [visitorCity, setVisitorCity]   = useState<string | null>(null)
+  const [bookingOpen, setBookingOpen]   = useState(false)
+  const [showBooked, setShowBooked]     = useState(false)
+
+  // Stripe redirects back to /?booked=1 on successful checkout. Show a
+  // confirmation banner and clean the param so it doesn't persist on reload.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('booked') === '1') {
+      setShowBooked(true)
+      params.delete('booked')
+      const cleaned = window.location.pathname + (params.toString() ? `?${params}` : '') + window.location.hash
+      window.history.replaceState({}, '', cleaned)
+    }
+  }, [])
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -262,6 +312,47 @@ export default function RemdovaPage() {
 
   return (
     <div style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif", color: '#111827', background: '#f9f7f4', overflowX: 'hidden' }}>
+      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
+
+      <AnimatePresence>
+        {showBooked && (
+          <motion.div
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              position: 'fixed', top: 76, left: '50%', transform: 'translateX(-50%)',
+              zIndex: 150, maxWidth: 560, width: 'calc(100% - 32px)',
+              background: 'linear-gradient(135deg, #16a34a, #15803d)',
+              borderRadius: 14, padding: '16px 20px', color: '#fff',
+              boxShadow: '0 16px 48px rgba(22,163,74,0.4)',
+              display: 'flex', alignItems: 'flex-start', gap: 12,
+            }}
+          >
+            <div style={{
+              flexShrink: 0, width: 32, height: 32, borderRadius: 8,
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <CheckCircle size={18} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: 2 }}>You're booked. We're rolling.</div>
+              <div style={{ fontSize: '0.84rem', color: 'rgba(255,255,255,0.9)', lineHeight: 1.5 }}>
+                Check your email for confirmation. A technician will be in touch within 60 minutes for the Portland metro.
+              </div>
+            </div>
+            <button onClick={() => setShowBooked(false)} aria-label="Dismiss"
+              style={{
+                background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)',
+                cursor: 'pointer', padding: 4, flexShrink: 0,
+              }}>
+              <X size={16} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <style>{`
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -300,6 +391,7 @@ export default function RemdovaPage() {
           .content-section { padding-top: 64px !important; padding-bottom: 64px !important; }
           .about-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
           .reviews-grid { grid-template-columns: 1fr !important; }
+          .how-grid { grid-template-columns: 1fr 1fr !important; }
           .footer-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
           .footer-nav { justify-content: flex-start !important; }
           .footer-contact-col { text-align: left !important; }
@@ -310,6 +402,7 @@ export default function RemdovaPage() {
         @media (max-width: 480px) {
           .why-grid { grid-template-columns: 1fr !important; }
           .areas-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .how-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -343,11 +436,11 @@ export default function RemdovaPage() {
 
         {/* Desktop links */}
         <div className="nav-links" style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem', fontWeight: 500 }}>
-          {['Services', 'Pricing', 'About', 'Areas', 'Contact'].map(link => (
-            <a key={link} href={`#${link.toLowerCase()}`} style={{ color: 'rgba(255,255,255,0.85)', transition: 'color 0.2s' }}
+          {NAV_LINKS.map(({ label, href }) => (
+            <a key={label} href={href} style={{ color: 'rgba(255,255,255,0.85)', transition: 'color 0.2s' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#f97316')}
               onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.85)')}
-            >{link}</a>
+            >{label}</a>
           ))}
           <a href={PHONE_HREF} style={{
             background: 'linear-gradient(135deg, #f97316, #ea580c)',
@@ -378,11 +471,11 @@ export default function RemdovaPage() {
               padding: '20px 5% 28px', display: 'flex', flexDirection: 'column', gap: 18,
             }}
           >
-            {['Services', 'Pricing', 'About', 'Areas', 'Contact'].map(link => (
-              <a key={link} href={`#${link.toLowerCase()}`}
+            {NAV_LINKS.map(({ label, href }) => (
+              <a key={label} href={href}
                 onClick={() => setMenuOpen(false)}
                 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 14 }}
-              >{link}</a>
+              >{label}</a>
             ))}
             <a href={PHONE_HREF} style={{
               background: 'linear-gradient(135deg, #f97316, #ea580c)',
@@ -476,22 +569,23 @@ export default function RemdovaPage() {
           <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3}
             style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}
           >
-            <a href={PHONE_HREF} style={{
+            <button onClick={() => setBookingOpen(true)} style={{
               display: 'inline-flex', alignItems: 'center', gap: 10,
               background: 'linear-gradient(135deg, #f97316, #ea580c)',
               color: '#fff', padding: '16px 32px', borderRadius: 12,
               fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.01em',
               boxShadow: '0 8px 32px rgba(249,115,22,0.35)',
+              border: 'none', cursor: 'pointer', fontFamily: 'inherit',
             }}>
-              <Phone size={18} />
-              Call for Free Assessment
-            </a>
-            <a href="#services" style={{
+              <Zap size={18} />
+              Book Emergency Service · $95
+            </button>
+            <a href={PHONE_HREF} style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               border: '2px solid rgba(255,255,255,0.3)', color: '#fff',
               padding: '14px 26px', borderRadius: 12, fontWeight: 600, fontSize: '1rem',
             }}>
-              Our Services <ArrowRight size={16} />
+              <Phone size={16} /> Or call us
             </a>
           </motion.div>
 
@@ -524,7 +618,7 @@ export default function RemdovaPage() {
         flexWrap: 'wrap', gap: '10px 32px',
       }}>
         {[
-          { icon: Clock, text: '24/7 Emergency Line' },
+          { icon: Clock, text: '60-Min Portland Metro Response' },
           { icon: Phone, text: PHONE },
           { icon: MapPin, text: 'Portland Metro Area' },
         ].map(({ icon: Icon, text }) => (
@@ -616,7 +710,7 @@ export default function RemdovaPage() {
               When you call us, you get the same local team from first inspection to final cleanup. No subcontractor roulette, no surprise invoices, no runaround with your insurance company.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              {['IICRC Certified', 'Oregon Licensed', 'Fully Insured', 'EPA Approved', 'BBB Accredited', 'CCB #219847'].map(b => (
+              {['IICRC Certified', 'Oregon Licensed', 'Fully Insured', 'EPA Approved'].map(b => (
                 <span key={b} style={{
                   background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)',
                   color: '#fb923c', padding: '6px 14px', borderRadius: 100, fontSize: '0.8rem', fontWeight: 600,
@@ -679,6 +773,45 @@ export default function RemdovaPage() {
         </div>
       </section>
 
+      {/* ── How It Works ── */}
+      <section id="how-it-works" className="content-section" style={{ padding: '100px 5%', background: '#f9f7f4' }}>
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
+          style={{ textAlign: 'center', marginBottom: 56 }}
+        >
+          <div style={{ color: '#ea580c', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
+            How It Works
+          </div>
+          <h2 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.9rem)', fontWeight: 900, color: '#0a0e1a', letterSpacing: '-0.03em', marginBottom: 16 }}>
+            From emergency to estimate, in four steps.
+          </h2>
+          <p style={{ color: '#6b7280', fontSize: '1.05rem', maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>
+            We've designed our intake to get a real technician to your door fast — and to make sure you know exactly what to expect before any major work begins.
+          </p>
+        </motion.div>
+
+        <div className="how-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, maxWidth: 1160, margin: '0 auto' }}>
+          {HOW_IT_WORKS.map((step, i) => (
+            <motion.div key={step.n}
+              variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i}
+              style={{
+                background: '#fff', borderRadius: 16, padding: '28px 24px',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.05)', position: 'relative',
+                border: '1px solid #e5e7eb',
+              }}
+            >
+              <div style={{
+                position: 'absolute', top: -14, left: 22,
+                background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                color: '#fff', fontWeight: 900, fontSize: '0.78rem',
+                padding: '5px 12px', borderRadius: 100, letterSpacing: '0.05em',
+              }}>{step.n}</div>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0a0e1a', marginTop: 14, marginBottom: 10, letterSpacing: '-0.01em' }}>{step.title}</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.9rem', lineHeight: 1.7 }}>{step.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* ── Pricing ── */}
       <section id="pricing" className="content-section" style={{ padding: '100px 5%', background: '#0a0e1a' }}>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
@@ -700,19 +833,28 @@ export default function RemdovaPage() {
           style={{ maxWidth: 1160, margin: '40px auto 32px', background: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,88,12,0.08))', border: '1px solid rgba(249,115,22,0.3)', borderRadius: 16, padding: '28px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}
         >
           <div style={{ flex: 1, minWidth: 260 }}>
-            <div style={{ color: '#f97316', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>Stop-the-Damage Fee</div>
-            <div style={{ color: '#fff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', marginBottom: 8 }}>$350 - $850</div>
+            <div style={{ color: '#f97316', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>Emergency Response Fee</div>
+            <div style={{ color: '#fff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', marginBottom: 8 }}>$95 flat</div>
             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.92rem', lineHeight: 1.65, margin: 0 }}>
-              On-site arrival, damage assessment, and immediate emergency mitigation to stop further loss. This fee is credited toward your full project cost.
+              Locks in our 60-minute Portland-metro response, covers dispatch, and is applied to your full project cost. Pay online to dispatch — we're rolling within minutes.
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 220 }}>
-            {['Free initial assessment by phone', 'Stop-the-damage fee applied to project', 'Full estimate provided before work begins'].map(pt => (
+            {['$95 applied to your final project cost', '60-minute Portland metro arrival', 'Full estimate provided before any major work'].map(pt => (
               <div key={pt} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: 'rgba(255,255,255,0.75)', fontSize: '0.86rem' }}>
                 <CheckCircle size={14} color="#4ade80" style={{ marginTop: 2, flexShrink: 0 }} />
                 {pt}
               </div>
             ))}
+            <button onClick={() => setBookingOpen(true)} style={{
+              marginTop: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              background: 'linear-gradient(135deg, #f97316, #ea580c)',
+              color: '#fff', padding: '11px 18px', borderRadius: 10,
+              fontWeight: 800, fontSize: '0.9rem', border: 'none', cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}>
+              <Zap size={14} /> Book emergency service
+            </button>
           </div>
         </motion.div>
 
@@ -767,8 +909,8 @@ export default function RemdovaPage() {
             <h2 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.9rem)', fontWeight: 900, color: '#0a0e1a', letterSpacing: '-0.03em', marginBottom: 16 }}>
               Serving Portland Metro & Beyond
             </h2>
-            <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: 480, margin: '0 auto' }}>
-              We maintain multiple service locations across the Portland area so we can reach you within 60 minutes, anywhere in the metro.
+            <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: 540, margin: '0 auto' }}>
+              <span style={{ color: '#0a0e1a', fontWeight: 700 }}>60-minute response guarantee</span> across the Portland metro. Same-day service in the greater Willamette Valley — exact response times depend on distance.
             </p>
           </motion.div>
 
@@ -814,57 +956,44 @@ export default function RemdovaPage() {
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
+      {/* ── First Reviews Coming In ── */}
       <section className="content-section" style={{ padding: '100px 5%', background: '#0a0e1a' }}>
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-          style={{ textAlign: 'center', marginBottom: 56 }}
+          style={{ textAlign: 'center', marginBottom: 36 }}
         >
           <div style={{ color: '#f97316', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-            Client Stories
+            Just Getting Started
           </div>
-          <h2 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.9rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em' }}>
-            What Oregon Homeowners Say
+          <h2 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.9rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', marginBottom: 16 }}>
+            Be one of our first 5-star reviews
           </h2>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
+            Remdova is a brand-new local company — we won't fake reviews to look bigger than we are. We'd rather earn yours. We're actively serving our first customers in the Portland metro and posting verified Google reviews as they come in.
+          </p>
         </motion.div>
 
-        <div className="reviews-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 1160, margin: '0 auto' }}>
-          {[
-            {
-              name: 'Karen T.', location: 'Lake Oswego',
-              text: "Burst pipe at 2am. They were at my house in under an hour, had fans running and the water contained before I even finished my coffee. Saved my hardwood floors.",
-              stars: 5,
-            },
-            {
-              name: 'Dave & Lisa M.', location: 'Beaverton',
-              text: "We'd been ghosted by two other companies. Remdova came out same day, gave us a straight assessment, and worked directly with our State Farm adjuster. Zero drama.",
-              stars: 5,
-            },
-            {
-              name: 'Robert K.', location: 'Tualatin',
-              text: "Found mold behind drywall during a remodel. They handled the remediation and the rebuild. One crew, one invoice. Professional start to finish.",
-              stars: 5,
-            },
-          ].map((t, i) => (
-            <motion.div key={t.name}
-              variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i}
-              style={{
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 16, padding: '32px 28px',
-              }}
-            >
-              <div style={{ display: 'flex', gap: 4, marginBottom: 18 }}>
-                {Array(t.stars).fill(null).map((_, j) => <Star key={j} size={15} color="#f97316" fill="#f97316" />)}
-              </div>
-              <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.95rem', lineHeight: 1.75, marginBottom: 22, fontStyle: 'italic' }}>
-                "{t.text}"
-              </p>
-              <div>
-                <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>{t.name}</div>
-                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem' }}>{t.location}</div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
+          style={{
+            maxWidth: 720, margin: '0 auto',
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 16, padding: '36px 32px', textAlign: 'center',
+          }}
+        >
+          <div style={{ display: 'inline-flex', gap: 6, marginBottom: 18, justifyContent: 'center' }}>
+            {Array(5).fill(null).map((_, j) => <Star key={j} size={20} color="#f97316" fill="#f97316" />)}
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1rem', lineHeight: 1.75, margin: '0 0 24px' }}>
+            We're committing to the same standard our consultant taught us: <span style={{ color: '#fff', fontWeight: 600 }}>set clear expectations, then meet them every time.</span> If we earn your trust on a job, we'd appreciate a real Google review. If we don't, tell us why and we'll make it right.
+          </p>
+          <a href={PHONE_HREF} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'linear-gradient(135deg, #f97316, #ea580c)',
+            color: '#fff', padding: '12px 24px', borderRadius: 10,
+            fontWeight: 800, fontSize: '0.92rem',
+          }}>
+            <Phone size={14} /> Call us to book the first job
+          </a>
+        </motion.div>
       </section>
 
       {/* ── Contact ── */}
@@ -895,7 +1024,7 @@ export default function RemdovaPage() {
                   <Phone size={22} color="#fff" />
                 </div>
                 <div>
-                  <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>24/7 Emergency Line</div>
+                  <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>Emergency Line</div>
                   <div style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.02em' }}>{PHONE}</div>
                 </div>
               </a>
@@ -903,7 +1032,7 @@ export default function RemdovaPage() {
               {[
                 { icon: Mail, label: 'Email', value: EMAIL, href: `mailto:${EMAIL}` },
                 { icon: MapPin, label: 'Service Area', value: 'Portland Metro, Oregon', href: '#areas' },
-                { icon: Clock, label: 'Availability', value: '24 hours / 7 days a week', href: null },
+                { icon: Clock, label: 'Response time', value: '60-min in Portland metro · Same-day Willamette Valley', href: null },
               ].map(({ icon: Icon, label, value, href }) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22 }}>
                   <div style={{ width: 44, height: 44, background: '#fff', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
@@ -984,7 +1113,7 @@ export default function RemdovaPage() {
                 </div>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.82rem', lineHeight: 1.65, maxWidth: 200, margin: '0 0 18px' }}>
-                Oregon's emergency restoration team. Available 24/7.
+                Oregon's emergency restoration team. 60-minute Portland metro response.
               </p>
               {/* Social icons */}
               <div style={{ display: 'flex', gap: 10 }}>
@@ -1012,11 +1141,11 @@ export default function RemdovaPage() {
 
             {/* Nav links */}
             <div className="footer-nav" style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap', fontSize: '0.85rem', paddingTop: 4 }}>
-              {['Services', 'Pricing', 'About', 'Areas', 'Contact'].map(link => (
-                <a key={link} href={`#${link.toLowerCase()}`} style={{ color: 'rgba(255,255,255,0.45)' }}
+              {NAV_LINKS.map(({ label, href }) => (
+                <a key={label} href={href} style={{ color: 'rgba(255,255,255,0.45)' }}
                   onMouseEnter={e => (e.currentTarget.style.color = '#f97316')}
                   onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
-                >{link}</a>
+                >{label}</a>
               ))}
             </div>
 
@@ -1032,7 +1161,7 @@ export default function RemdovaPage() {
           </div>
 
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, fontSize: '0.8rem' }}>
-            <span>© {new Date().getFullYear()} Remdova LLC. All rights reserved. Oregon CCB #219847.</span>
+            <span>© {new Date().getFullYear()} Remdova. All rights reserved.</span>
             <span>Emergency Restoration · Portland Metro · Oregon</span>
           </div>
         </div>
